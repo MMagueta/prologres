@@ -1,0 +1,81 @@
+#+TITLE: Prologres
+
+* About
+
+Prologres is a PostgreSQL foreign library for SWI-Prolog. It allows
+you to connect to PostgreSQL databases and execute queries directly
+from Prolog code.
+
+* Features
+
+- Connect to PostgreSQL databases
+- Execute SQL queries
+- Retrieve results as Prolog lists
+- Clean connection management
+
+* Building
+
+Using Nix:
+
+#+begin_src sh
+nix build
+#+end_src
+
+* Running
+
+#+begin_src sh
+nix run
+#+end_src
+
+Or manually with SWI-Prolog:
+
+#+begin_src sh
+swipl -p foreign=./result/lib/. src/main.pro
+#+end_src
+
+* Example Usage
+
+#+begin_src prolog
+:- use_foreign_library('./result/lib/prologlib.so').
+
+example_basic :-
+  pg_connect("host=localhost dbname=prolog_store user=admin password=admin", Conn),
+  pg_query("SELECT 1", Conn, Result),
+  write('Result: '), writeln(Result),
+  pg_disconnect(Conn).
+#+end_src
+
+* Development
+
+Start the development environment with PostgreSQL:
+
+#+begin_src sh
+nix develop --impure
+devenv up
+#+end_src
+
+* API
+
+** pg_connect(+ConnInfo, -ConnectionHandler)
+Connects to a PostgreSQL database using a connection string.
+
+** pg_disconnect(+ConnectionHandler)
+Closes a database connection.
+
+** pg_query(+Query, +ConnectionHandler, -Result)
+Executes a SQL query and returns results as a list of rows.
+
+* TODOs
+** DONE Static query support
+** TODO Add prepared statement support
+** TODO Implement transaction manipulation (BEGIN, COMMIT and ROLLBACK)
+** TODO Add parameter binding for queries
+** TODO Improve error handling
+** TODO Add connection pooling
+** TODO Write a test suite
+** TODO Add type conversion (integers, floats, dates, etc)
+** TODO Document all predicates properly
+** TODO Notification
+** TODO Async and Sync query support
+** TODO Query cancellation
+** TODO Handle NULL values more elegantly (to the measure it's possible 💀)

@@ -1,5 +1,5 @@
 {
-  description = "A Prolog PostgreSQL library";
+  description = "Prologres - A Prolog PostgreSQL library";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -23,7 +23,23 @@
                 packages = with pkgs; [
                   swi-prolog
                   postgresql_18
+                  clang-tools
                 ];
+
+                languages.c = {
+                  enable = true;
+                };
+
+                enterShell = ''
+                  # Generate .clangd configuration for LSP
+                  cat > .clangd << EOF
+                  CompileFlags:
+                    Add:
+                      - -I${pkgs.swi-prolog}/lib/swipl/include
+                      - -I${pkgs.postgresql_18.dev}/include
+                      - -I${pkgs.postgresql_18.dev}/include/server
+                  EOF
+                '';
 
                 services.postgres = {
                   enable = true;
@@ -61,7 +77,7 @@
           packages.devenv-up = self.devShells.${system}.default.config.procfileScript;
 
         packages.default = pkgs.stdenv.mkDerivation {
-          name = "prologue";
+          name = "prologres";
           src = ./.;
 
           buildInputs = with pkgs; [
@@ -82,7 +98,7 @@
         
         apps.default = {
           type = "app";
-          program = "${pkgs.writeShellScript "prologue-run" ''
+          program = "${pkgs.writeShellScript "prologres-run" ''
             ${pkgs.swi-prolog}/bin/swipl -p foreign=${self.packages.${system}.default}/lib/. ${self.packages.${system}.default}/src/main.pro "$@"
           ''}";
         };
